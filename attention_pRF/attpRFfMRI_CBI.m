@@ -6,8 +6,8 @@ close all
 clc
 echo off
 % Options
-Scan            = 1;
-eyeTrackON      = 1;
+Scan            = 0;
+eyeTrackON      = 0;
 pilot           = 0;
 oneScreenOnly   = 0; % To set the alpha filter on the screen
 currentScanSession  = input(sprintf('\n\tCurrent Scan Session: '));
@@ -26,7 +26,7 @@ else
     output.Subject  = 'test';
     output.SubjectEdf  = 'test';
 end
-session         = 'nyu3t01'; % synch this to the current scan session input
+session         = sprintf('nyu3t0%i', currentScanSession); % synch this to the current scan session input
 task            = 'attPRF';
 
 %%%%%%%%%%%
@@ -207,6 +207,7 @@ t.gaborDisplay    = 0.1;
 t.ISI2            = 0.5;
 t.responseDur     = 1.2;
 t.feedbackDur     = 0.3;
+t.exitGradient    = 6;
 %% Experimental design matrix maker
 if exist(designFileName,'file')
     fprintf('>>>>>>>>>>> loading the design matrix from Run 1....\n')
@@ -364,28 +365,31 @@ else
     
     % Make the stimulus event durations matrix:
     design.numofUniqueEvents = 7;
-    startHere = 1;
-    endHere   = design.numofUniqueEvents;
-    
+    design.allTimings = [];
+    design.stimType =[];
     for idx = 1:design.numTrials
-        temp = [t.fixation, t.preCue, design.T3(idx,1), design.T4(idx,1), t.gaborDisplay, t.ISI2, design.T7(idx,1)+t.feedbackDur]';
-        design.allTimings(startHere:endHere,1) = temp;
-        t.allTimings = design.allTimings;
-        startHere = startHere + design.numofUniqueEvents;
-        endHere = endHere + design.numofUniqueEvents;
+        timeintrial = [t.fixation, t.preCue, design.T3(idx,1), design.T4(idx,1), t.gaborDisplay, t.ISI2, design.T7(idx,1)+t.feedbackDur]';
+        stimintrial = [1:7]';
+        if mod(idx, 52) == 0
+            timeintrial = [t.fixation, t.preCue, design.T3(idx,1), design.T4(idx,1), t.gaborDisplay, t.ISI2, design.T7(idx,1)+t.feedbackDur, t.exitGradient]';
+            stimintrial = [1:8]';
+        end
+        design.allTimings = [design.allTimings; timeintrial];
+        design.stimType   = [design.stimType; stimintrial];
     end
     save(designFileName, 'design');
 end
 t.allTimings = design.allTimings;
+t.stimType = design.stimType;
+
 t.numofUniqueEvents = 7; % T1 to T7
-t.stimType = repmat((1:t.numofUniqueEvents)', design.numTrials, 1);
 t.totalTime           = sum(t.allTimings);
 t.allEvents           = [t.stimType t.allTimings];
 t.numRuns             = design.numRuns;
 t.numTrials           = design.numTrials;
 t.numPracticeTrials   = 30;
 t.numTrialsperRun     = t.numTrials/t.numRuns;
-t.numEventsinBlock    = t.numTrialsperRun*t.numofUniqueEvents;
+t.numEventsinBlock    = t.numTrialsperRun*t.numofUniqueEvents +1;
 t.eventType           = t.allEvents(1:t.numEventsinBlock)';
 t.runDuration         = round(t.totalTime/t.numRuns);
 output.TotalTRs       = t.runDuration/t.TR;
@@ -545,7 +549,7 @@ for idx = 1:length(t.eventType)
     squarePlaceHolders(stim, window);
     
     % Draws the fixation cross when the event type is called
-    if currentEvent == 1
+    if currentEvent == 1 || currentEvent == 8
         colorMat = stim.fixationCrossColor;
         my_fixationCross(window , stim, w, colorMat);
     end
