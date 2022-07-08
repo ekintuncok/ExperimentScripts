@@ -491,7 +491,7 @@ end
 
 KbTriggerWait(triggerKey, deviceNumber);
 fprintf('>>>>>>>>>>> trigger detected \n')
-RestrictKeysForKbCheck([32, 33]);
+RestrictKeysForKbCheck(keyPressNumbers);
 
 if eyeTrackON
     [status, el] = eyeTrackingRecord(el, rect, stim.ppd);
@@ -615,7 +615,7 @@ for idx = 1:length(t.eventType)
         preResponseVBL = Screen('Flip',window);
         % % Keyboard checking :
         while ~buttonPush && ~timedOut
-            [keyIsDown, seconds, keyCode] = KbCheck;
+            [keyIsDown, seconds, keyCode] = KbCheck(deviceNumber);
             if seconds - tStart > t2wait - t.bufferTime
                 answer = NaN;
                 timedOut = 1;
