@@ -169,6 +169,12 @@ if const.in_R2 == 1
 end
 
 if const.task == 1 && answer ~= 99
+    % staircase calibration does not seem to work consistently. I haven't
+    % yet figured out the best set of input parameters to have it working
+    % better. So it's optional for the time being
+    if const.staircase_calibration == 1 && t < 20
+        answer = rand > 0.5;
+    end
     staircase.data(target) = usePalamedes(staircase.data(target), answer);
     updated_tilt = staircase.data(target).xCurrent;
 end

@@ -59,7 +59,7 @@ save([const.subj_output_dir, '/', const.const_fileMat],'const');
 if const.task == 1 && const.practiceRound == 0
     save([const.subj_output_dir, '/', const.Output],'output');
 elseif const.task == 2 && const.practiceRound == 0
-    save([const.subj_output_dir, '/', const.staircase],'output');
+    save([const.subj_output_dir, '/', const.Output],'output');
 elseif const.practiceRound == 1
     save([const.subj_output_dir, '/', const.Output],'output');
 end

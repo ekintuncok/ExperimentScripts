@@ -147,14 +147,14 @@ if const.task == 1
     
 elseif const.task == 2
     staircase = [];
-    if exist(sprintf([const.output_dir '/%s/titration_block/%s_exoSpread_Output.mat'],const.sjct, const.sjctCode), 'file')
-        load(sprintf([const.output_dir '/%s/titration_block/%s_exoSpread_Output.mat'],const.sjct, const.sjctCode));
+    if exist(sprintf([const.output_dir '/%s/titration_block/%s_Output.mat'],const.sjct, const.sjctCode), 'file')
+        load(sprintf([const.output_dir '/%s/titration_block/%s_Output.mat'],const.sjct, const.sjctCode));
         fprintf('>> Successfully loaded the staircase files. \n');
         const.numOfStaircases = 12;
         for loc = 1:const.numOfStaircases
             const.gaborOri(loc) =  output.staircase.data(loc).mean;
         end
-        fprintf('>> Threshold levels are set to: %i\n', const.gaborOri)
+        fprintf('>> Threshold levels are set to: %f\n', const.gaborOri)
     else
         const.gaborOri  = [10 12 15 14 18 12 17 20 9 10 18 12];
         if const.practiceRound == 0
