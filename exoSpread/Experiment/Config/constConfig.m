@@ -20,6 +20,7 @@ const.lateAnswer     = [const.orange];
 
 % Time
 const.my_clock_ini = clock;
+const.num_locations = 8;
 
 % Fixation cross
 const.sideFP_val       = 0.2;         [const.sideFP_X,const.sideFP_Y] = vaDeg2pix(const.sideFP_val,scr);
@@ -29,10 +30,10 @@ const.thicknessFP_X    = ceil(const.thicknessFP_X);
 % Attentional cue:
 const.cue_size_deg = 0.2;
 [const.cue_size_xpix, const.cue_size_ypix] = vaDeg2pix(const.cue_size_deg ,scr);
-const.cue_size = repmat(const.cue_size_xpix, 1, 12);
-
+const.cue_size = repmat(const.cue_size_xpix, 1, const.num_locations*4);
+const.cue_radius_from_stimcenter = 2; % in degrees
 % Eccentricity
-const.gaborEcc = [2, 6, 10]; % for cardinal locations
+const.gaborEcc = [3, 9]; % for cardinal locations
 [const.gaborEcc_xpix, const.gaborEcc_ypix] = vaDeg2pix(const.gaborEcc ,scr);
 
 % Spatial Frequency and contrast:
@@ -54,12 +55,24 @@ const.gaborEnvSDeg  = const.gaborfwhm./(sqrt(8*log(2))); % desired standard devi
 const.gaborWidth    = const.gaborSize/(const.gaborEnvSDeg*4*pi);
 
 % Gabor Locations:
-const.num_locations = 12;
 const.angles = [0, 90, 180, 270];
 const.angles_in_rad = deg2rad(const.angles);
 
 [const.xDist, const.yDist] = pol2cart(reshape(repmat(const.angles_in_rad,const.num_locations/4,1), const.num_locations,[])',...
-    repmat(const.gaborEcc_xpix, 1, const.num_locations/3));
+    repmat(const.gaborEcc_xpix, 1, const.num_locations/2));
+
+% assign placeholder locations:
+const.placeholders_loc = [];
+for plchldr = 1:length(const.xDist)
+    
+    plchldr_lc(1, :) = [const.xDist(plchldr) + 1.2*scr.ppd; const.yDist(plchldr) + 1.2*scr.ppd];
+    plchldr_lc(2, :) = [const.xDist(plchldr) + 1.2*scr.ppd; const.yDist(plchldr) - 1.2*scr.ppd];
+    plchldr_lc(3, :) = [const.xDist(plchldr) - 1.2*scr.ppd; const.yDist(plchldr) + 1.2*scr.ppd];
+    plchldr_lc(4, :) = [const.xDist(plchldr) - 1.2*scr.ppd; const.yDist(plchldr) - 1.2*scr.ppd];
+
+    const.placeholders_loc = [const.placeholders_loc; plchldr_lc];
+    plchldr_lc = zeros(4, 2);
+end
 
 for ii = 1:const.num_locations
     xDist_temp = scr.mid(1)+ const.xDist(ii) - (const.visible_size/2);
@@ -83,16 +96,18 @@ const.modula = exp(-((const.x/const.gaborWidth).^2)-((const.y/const.gaborWidth).
 
 % Experimental timing
 const.T1  = 0.6; % fixation
-const.T2  = 0.1; % pre-cue
+const.T2  = 0.04; % pre-cue
 const.T3  = 0.1; % ISI
 const.T4  = 0.1; % target display
-const.T5  = 0.1; % response cue
+const.T5  = 0.1; % ISI
+const.T6  = 0.1; % response cue
 
 const.numFrm_T1  =  round(const.T1/scr.frame_duration);
 const.numFrm_T2  =  round(const.T2/scr.frame_duration);
 const.numFrm_T3  =  round(const.T3/scr.frame_duration);
 const.numFrm_T4  =  round(const.T4/scr.frame_duration);
 const.numFrm_T5  =  round(const.T5/scr.frame_duration);
+const.numFrm_T6  =  round(const.T6/scr.frame_duration);
 
 const.numFrm_T1_start  = 1;
 const.numFrm_T1_end    =  const.numFrm_T1_start  + const.numFrm_T1-1;
@@ -109,7 +124,10 @@ const.numFrm_T4_end    =  const.numFrm_T4_start  + const.numFrm_T4-1;
 const.numFrm_T5_start  = const.numFrm_T4_end+1;
 const.numFrm_T5_end    =  const.numFrm_T5_start  + const.numFrm_T5-1;
 
-const.numFrm_Tot =  const.numFrm_T1 + const.numFrm_T2 + const.numFrm_T3 + const.numFrm_T4 + const.numFrm_T5;
+const.numFrm_T6_start  = const.numFrm_T5_end+1;
+const.numFrm_T6_end    =  const.numFrm_T6_start  + const.numFrm_T6-1;
+
+const.numFrm_Tot =  const.numFrm_T1 + const.numFrm_T2 + const.numFrm_T3 + const.numFrm_T4 + const.numFrm_T5 + const.numFrm_T6;
 
 % Eyelink fixation check setting
 
@@ -150,13 +168,13 @@ elseif const.task == 2
     if exist(sprintf([const.output_dir '/%s/titration_block/%s_Output.mat'],const.sjct, const.sjctCode), 'file')
         load(sprintf([const.output_dir '/%s/titration_block/%s_Output.mat'],const.sjct, const.sjctCode));
         fprintf('>> Successfully loaded the staircase files. \n');
-        const.numOfStaircases = 12;
+        const.numOfStaircases = const.num_locations;
         for loc = 1:const.numOfStaircases
             const.gaborOri(loc) =  output.staircase.data(loc).mean;
         end
         fprintf('>> Threshold levels are set to: %f\n', const.gaborOri)
     else
-        const.gaborOri  = [10 12 15 14 18 12 17 20 9 10 18 12];
+        const.gaborOri  = [10 12 15 14 18 12 17 20];
         if const.practiceRound == 0
             fprintf('>> WARNING! Couldn''t fetch the staircase file!\n');
         elseif const.practiceRound == 1

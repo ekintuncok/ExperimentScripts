@@ -4,7 +4,7 @@ expDes.timeCalibMin = 7;
 expDes.timeCalib = expDes.timeCalibMin * 60;
 
 if const.task == 1
-    expDes.num_target_locations = 12;
+    expDes.num_target_locations = const.num_locations;
     expDes.num_trials_per_loc = 50;
     expDes.num_trials  = expDes.num_trials_per_loc * expDes.num_target_locations;
     temp = reshape(repmat(1:expDes.num_target_locations, expDes.num_trials_per_loc,1), expDes.num_trials, []);
@@ -24,9 +24,9 @@ if const.task == 1
     
 elseif const.task == 2
     if const.fromBlock == 1
-        expDes.num_target_locations = 12;
-        expDes.num_distractors = 11;
-        expDes.num_target_trials_per_loc = 550;
+        expDes.num_target_locations = const.num_locations;
+        expDes.num_distractors = expDes.num_target_locations - 1;
+        expDes.num_target_trials_per_loc = 420;
         
         expDes.num_trials  = expDes.num_target_trials_per_loc * expDes.num_target_locations;
         expDes.cue_validity = 0.5;

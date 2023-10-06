@@ -8,7 +8,7 @@ clc
 % General settings
 const.expName      = 'exoSpread';          % experiment name and folder
 const.eyeMvt       = 1;
-const.expStart = 1;
+const.expStart = 0;
 
 if const.expStart == 0
     const.in_R2 = 0;
@@ -47,6 +47,8 @@ end
 const.practiceRound = input('>> practice (1) or no practice (0)?');
 if const.practiceRound == 0
     const.task = input('>> staircase (1) or main experiment (2)?');
+else
+    const.task = 2;
 end
 
 if const.task == 1

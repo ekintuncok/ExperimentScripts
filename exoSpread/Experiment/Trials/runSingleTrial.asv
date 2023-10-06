@@ -5,13 +5,13 @@ if const.task == 1 % staircase!
     curr_trial_info = curr_block_mat(t, :);
     target = curr_block_mat(t, 2);
     tilt_dir = curr_trial_info(:, 3); % either 1 or -1
-    exo_cue_colors = repmat(const.black, const.num_locations*4, 3)';
+    exo_cue_colors = repmat(const.black, const.num_locations, 3)';
     for ii = 1:const.num_locations
         target_angle(ii) =  staircase.data(ii).xCurrent;
     end
     target_angle = randsample([-1,-1,-1,-1,1,1,1,1], const.num_locations).* target_angle;
     resp_cue_colors = repmat(const.white, const.num_locations*4,3)';
-    resp_cue_colors(:, 4*target-3:4*target) = repmat(const.black, 3, 4);
+    resp_cue_colors(:, target) = repmat(const.black, 3, 1);
 
 elseif const.task == 2
     curr_trial_info = curr_block_mat(t, 1:5);
@@ -20,12 +20,12 @@ elseif const.task == 2
     cue = curr_trial_info(:, 3);
     tilt_dir = curr_trial_info(:, 5); % either 1 or -1
 
-    exo_cue_colors = repmat(const.white, const.num_locations*4,3)';
-    exo_cue_colors(:, 4*cue-3:4*cue) = repmat(const.black, 3, 4);
+    exo_cue_colors = repmat(const.white, const.num_locations,3)';
+    exo_cue_colors(:, cue) = repmat(const.black, 3, 1);
     target_angle = randsample([-1,-1,-1,-1,1,1,1,1], const.num_locations) .* const.gaborOri;
 
-    resp_cue_colors = repmat(const.white, const.num_locations*4,3)';
-    resp_cue_colors(:, 4*target-3:4*target) = repmat(const.black, 3, 4);
+    resp_cue_colors = repmat(const.white, const.num_locations,3)';
+    resp_cue_colors(:, target) = repmat(const.black, 3, 1);
 end
 
 
@@ -179,7 +179,7 @@ if const.task == 1 && answer ~= 99
 end
 
 my_feedback(scr,const,colorMatrixFeedback);
-Screen('DrawDots', scr.main,const.placeholders_loc', const.cue_size, const.white,  scr.mid, 1);
+Screen('DrawDots', scr.main,[const.xDist; const.yDist], const.cue_size, const.white,  scr.mid, 1);
 Screen('Flip', scr.main); WaitSecs(0.3);
 
 if const.task == 1

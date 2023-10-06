@@ -1,7 +1,9 @@
 function output = runTrials(scr,const,expDes,el,staircase, my_key,textExp,button)
 
 % Gereral instructions:
-instructionsFB(scr,const,my_key,'instructions_exoSp')
+if const.in_R2 == 1
+    instructionsFB(scr,const,my_key,'instructions_exoSp')
+end
 
 % first mouse config
 if const.eyeMvt;HideCursor;end
@@ -27,7 +29,7 @@ expDes.addTarget = [];
 
 if const.task == 1 && const.practiceRound == 0
     curr_block_mat = expDes.expMat;
-    break_size = 6;
+    break_size = 5;
     full_length = length(curr_block_mat);
     trial_per_sub_block =reshape(repmat(1:break_size, length(curr_block_mat)/break_size, 1), 1, full_length)';
     block_info_column_ind = 4;
