@@ -7,12 +7,20 @@ if const.task == 1 % staircase!
     tilt_dir = curr_trial_info(:, 3); % either 1 or -1
     exo_cue_colors = repmat(const.black, const.num_locations*4, 3)';
     for ii = 1:const.num_locations
-        target_angle(ii) =  staircase.data(ii).xCurrent;
+        target_angle(ii) =   staircase.data(ii).xCurrent;
     end
     target_angle = randsample([-1,-1,-1,-1,1,1,1,1], const.num_locations).* target_angle;
     resp_cue_colors = repmat(const.white, const.num_locations*4,3)';
-    resp_cue_colors(:, 4*target-3:4*target) = repmat(const.black, 3, 4);
-
+    if target <= 8
+        resp_cue_colors(:, 4*target-3:4*target) = repmat(const.black, 3, 4);
+    elseif target > 8
+        target_for_staircase = mod(target, const.num_locations);
+        if target_for_staircase == 0
+            target_for_staircase = 8;
+        end
+        resp_cue_colors(:, 4*target_for_staircase-3:4*target_for_staircase) = repmat(const.black, 3, 4);
+    end
+    
 elseif const.task == 2
     curr_trial_info = curr_block_mat(t, 1:5);
     % get the target, cue and target tilt information of the current trial:
@@ -20,19 +28,30 @@ elseif const.task == 2
     cue = curr_trial_info(:, 3);
     tilt_dir = curr_trial_info(:, 5); % either 1 or -1
 
-    exo_cue_colors = repmat(const.white, const.num_locations*4,3)';
-    exo_cue_colors(:, 4*cue-3:4*cue) = repmat(const.black, 3, 4);
+    if cue == 0
+        exo_cue_colors = repmat(const.black, const.num_locations*4, 3)';
+    else
+        exo_cue_colors = repmat(const.white, const.num_locations*4,3)';
+        exo_cue_colors(:, 4*cue-3:4*cue) = repmat(const.black, 3, 4);
+    end
     target_angle = randsample([-1,-1,-1,-1,1,1,1,1], const.num_locations) .* const.gaborOri;
 
     resp_cue_colors = repmat(const.white, const.num_locations*4,3)';
     resp_cue_colors(:, 4*target-3:4*target) = repmat(const.black, 3, 4);
 end
 
-
-if tilt_dir == -1 && target_angle(target) > 0
-    target_angle(target) = -1 * target_angle(target);
-elseif tilt_dir == 1 && target_angle(target) < 0
-    target_angle(target) = -1 * target_angle(target);
+if target <= 8
+    if tilt_dir == -1 && target_angle(target) > 0
+        target_angle(target) = -1 * target_angle(target);
+    elseif tilt_dir == 1 && target_angle(target) < 0
+        target_angle(target) = -1 * target_angle(target);
+    end
+elseif target > 8
+    if tilt_dir == -1 && target_angle(target_for_staircase) > 0
+        target_angle(target_for_staircase) = -1 * target_angle(target_for_staircase);
+    elseif tilt_dir == 1 && target_angle(target_for_staircase) < 0
+        target_angle(target_for_staircase) = -1 * target_angle(target_for_staircase);
+    end
 end
 
 stopThisTrial = 0; % For fixation calibration (NOT implemented yet)
@@ -109,20 +128,8 @@ for tframes = 1:const.numFrm_Tot
     end
 end
 
-if ~stopThisTrial && const.in_R2 == 1
+if stopThisTrial ~= 1 && fixation == 1 
     [key_press,tRT]= getAnswer(scr,const,my_key);
-elseif ~stopThisTrial && const.in_R2 == 0
-    colorMatrixFeedback = const.corrAns;
-    trial_code = 1;
-    key_press.left = 1;
-    key_press.right = 1;
-    key_press.space = 0;
-    key_press.escape = 0;
-    tRT = 0.5;
-    answer = 1;
-end
-
-if fixation == 1
     tRT = tRT - vbl;
 else
     tRT = 99;
@@ -133,37 +140,36 @@ else
     answer = 99;
 end
 
-if const.in_R2 == 1
-    if stopThisTrial == 1 && fixation == 0
-        trial_code = 0;% lost fixation (broken trial)
-        disp('Fixation lost...')
-        answer = 99;
-        tRT = NaN;
-        updated_tilt = NaN;
-        colorMatrixFeedback = const.missedFixation;
-    else
-        if key_press.right == 1
-            trial_code = 1;
-            if tilt_dir == 1
-                colorMatrixFeedback = const.corrAns;
-                answer = 1;
-            else
-                colorMatrixFeedback = const.incorrAns;
-                answer = 0;
-            end
-        elseif key_press.left == 1
-            trial_code = 1;
-            if tilt_dir == 1
-                colorMatrixFeedback = const.incorrAns;
-                answer = 0;
-            else
-                colorMatrixFeedback = const.corrAns;
-                answer = 1;
-            end
-        elseif key_press.escape == 1 || key_press.space == 1
-            trial_code = -1;
-            answer = 99;
+
+if stopThisTrial == 1 && fixation == 0
+    trial_code = 0;% lost fixation (broken trial)
+    disp('Fixation lost...')
+    answer = 99;
+    tRT = NaN;
+    updated_tilt = NaN;
+    colorMatrixFeedback = const.missedFixation;
+else
+    if key_press.right == 1
+        trial_code = 1;
+        if tilt_dir == 1
+            colorMatrixFeedback = const.corrAns;
+            answer = 1;
+        else
+            colorMatrixFeedback = const.incorrAns;
+            answer = 0;
         end
+    elseif key_press.left == 1
+        trial_code = 1;
+        if tilt_dir == 1
+            colorMatrixFeedback = const.incorrAns;
+            answer = 0;
+        else
+            colorMatrixFeedback = const.corrAns;
+            answer = 1;
+        end
+    elseif key_press.escape == 1 || key_press.space == 1
+        trial_code = -1;
+        answer = 99;
     end
 end
 

@@ -96,9 +96,9 @@ const.modula = exp(-((const.x/const.gaborWidth).^2)-((const.y/const.gaborWidth).
 
 % Experimental timing
 const.T1  = 0.6; % fixation
-const.T2  = 0.04; % pre-cue
-const.T3  = 0.1; % ISI
-const.T4  = 0.1; % target display
+const.T2  = 0.06; % pre-cue
+const.T3  = 0.04; % ISI
+const.T4  = 0.15; % target display
 const.T5  = 0.1; % ISI
 const.T6  = 0.1; % response cue
 
@@ -148,8 +148,8 @@ save([const.subj_output_dir, '/', const.const_fileMat],'const');
 if const.task == 1
     staircase.whichStair        = 1; % QUEST = 2, bestPEST = 1;
     staircase.currStair         = 8;
-    staircase.alphaRange        = [0.25:0.2:3, 3.5:0.25:15];
-    staircase.fitBeta           = 2; % slope
+    staircase.alphaRange        = [0.25:0.2:3, 3.5:0.25:30];
+    staircase.fitBeta           = 2.5; % slope
     staircase.fitLambda         = 0.01; % lapse rate
     staircase.fitGamma          = 0.5; % guess rate
     staircase.PF                = @arbWeibull;
@@ -159,19 +159,26 @@ if const.task == 1
         staircase.updateAfterTrial = 10;
         staircase.preUpdateLevels = randi(45, 1, staircase.updateAfterTrial);
     end
-    staircase.data = repmat(usePalamedes(staircase), const.num_locations, 1);
     
+    staircase_temp1 = repmat(usePalamedes(staircase), const.num_locations, 1);
+    staircase.alphaRange  = fliplr([0.25:0.2:3, 3.5:0.25:30]);
+    staircase_temp2 = repmat(usePalamedes(staircase), const.num_locations, 1);
+    staircase.data = cat(1, staircase_temp1, staircase_temp2);
     fprintf('\nCreated the staircase parameters! \n');
-    
+
 elseif const.task == 2
     staircase = [];
     if exist(sprintf([const.output_dir '/%s/titration_block/%s_Output.mat'],const.sjct, const.sjctCode), 'file')
         load(sprintf([const.output_dir '/%s/titration_block/%s_Output.mat'],const.sjct, const.sjctCode));
         fprintf('>> Successfully loaded the staircase files. \n');
+        first_staircase = output.staircase.data(1:8);
+        second_staircase = output.staircase.data(9:16);
         const.numOfStaircases = const.num_locations;
         for loc = 1:const.numOfStaircases
-            const.gaborOri(loc) =  output.staircase.data(loc).mean;
+            loc_thresh_1(loc, 1) = second_staircase(loc).mean;
+            loc_thresh_2(loc, 1) = first_staircase(loc).mean;
         end
+        const.gaborOri =  mean([loc_thresh_1, loc_thresh_2],2);
         fprintf('>> Threshold levels are set to: %f\n', const.gaborOri)
     else
         const.gaborOri  = [10 12 15 14 18 12 17 20];

@@ -27,6 +27,8 @@ if strcmp(const.compName,'Mac OS 10.13.6')
         newtable = Screen('ReadNormalizedGammaTable',scr.scr_num);
     end
 
+elseif strcmp(const.compName,'Mac OS 14.1.1')
+    const.desiredRes   = [1600, 900];
 elseif strcmp(const.compName,'Mac OS 13.4.1')
     const.desiredRes   = [1600, 900];
 end

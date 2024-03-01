@@ -10,7 +10,8 @@ key_press.push_button = 0;
 key_press.escape = 0;
 key_press.space = 0;
 % Keyboard checking :
-Screen('DrawDots', scr.main,[const.xDist; const.yDist], const.cue_size, const.white,  scr.mid, 1);
+Screen('DrawDots', scr.main,const.placeholders_loc', const.cue_size, const.white,  scr.mid, 1);
+
 my_fixationCross(scr,const);
 
 Screen('Flip',scr.main);

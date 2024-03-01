@@ -9,12 +9,7 @@ clc
 const.expName      = 'exoSpread';          % experiment name and folder
 const.eyeMvt       = 1;
 const.expStart = 0;
-
-if const.expStart == 0
-    const.in_R2 = 0;
-else
-    const.in_R2 = 1;
-end
+const.in_R2 = 0;
 
 if const.in_R2 == 1
     const.path2project =  '/Users/purplab/Documents/Experiments/Ekin/exoSpread';
@@ -38,7 +33,7 @@ screens = Screen('Screens');
 scr.main = max(screens);
 
 const.nbDebugTrials = false; % number of trials (for debugging)
-if oneScreenOnly == 1
+if oneScreenOnly == 1 && const.expStart == 0
     PsychDebugWindowConfiguration(0,0.40);
     const.expStart     = 0;
     const.eyeMvt       = 0;
